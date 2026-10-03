@@ -240,7 +240,7 @@ def main():
     client_thread.start()
     
     # Run the TUI while the receiver thread is alive
-    with Live(telemetry_table(latest_telemetry), refresh_per_second=1) as live:
+    with Live(telemetry_table(latest_telemetry), refresh_per_second=4) as live:
         while True:
             # Update the latest telemetry packet is a new one is available
             if not telemetry_queue.empty():

@@ -9,14 +9,16 @@ import socket
 import random
 import time
 
-def build_telem_packet() -> str:
-    lat = random.normalvariate(35.123456)
-    lon = random.normalvariate(-120.123456)
-    alt = random.normalvariate(300.123456)
-    hdg = random.normalvariate(279.123456)
-    speed = random.normalvariate(123_456.123)
-    attitude = (1.0, 0.0, 0.0, 0.0)
-    return f"{lat},{lon},{alt},{hdg},{speed},{attitude[0]},{attitude[1]},{attitude[2]},{attitude[3]}"
+def build_telem_packet(loss_rate: float) -> str:
+    lat = random.normalvariate(35.123456) if random.uniform(0.0, 1.0) > loss_rate else None
+    lon = random.normalvariate(-120.123456) if random.uniform(0.0, 1.0) > loss_rate else None
+    alt = random.normalvariate(300.123456) if random.uniform(0.0, 1.0) > loss_rate else None
+    hdg = random.normalvariate(279.123456) if random.uniform(0.0, 1.0) > loss_rate else None
+    speed = random.normalvariate(123_456.123) if random.uniform(0.0, 1.0) > loss_rate else None
+    attitude = [random.normalvariate(1.0), random.normalvariate(), random.normalvariate(), random.normalvariate()] if random.uniform(0.0, 1.0) > loss_rate else [None, None, None, None]
+    data = [lat, lon, alt, hdg, speed] + attitude
+    data = [str(element) for element in data]
+    return ",".join(data)
 
 def wrap_packet(packet: str) -> str:
     return "$TX" + packet + "RX$"
@@ -60,15 +62,15 @@ def main():
     
     while True:
         # Create fake packet data
-        telem = build_telem_packet()
+        telem = build_telem_packet(args.loss_rate)
         # Add packet padding to the payload
         telem = wrap_packet(telem)
         # And finally, send the payload out to the destination (client)
         server_sock.sendto(
             telem.encode(),
-            (args.dest_ip_addr, args.port)
+            (args.dest_ip_addr, args.dest_port)
         )
-        print(f"Sent {len(telem.encode())} bytes to ({args.dest_ip_addr}:{args.port})")
+        print(f"Sent {len(telem.encode())} bytes to ({args.dest_ip_addr}:{args.dest_port})")
         # Set frequency to what is specified
         time.sleep(1 / args.frequency)
 
