@@ -20,8 +20,11 @@ def build_telem_packet(loss_rate: float) -> str:
     data = [str(element) for element in data]
     return ",".join(data)
 
-def wrap_packet(packet: str) -> str:
-    return "$TX" + packet + "RX$"
+def wrap_packet(packet: str, error_rate: float) -> str:
+    if random.uniform(0.0, 1.0) > error_rate:
+        return "$TX" + packet
+    else:
+        return "$TX" + packet + "RX$"
 
 def main():
     parser = argparse.ArgumentParser(
@@ -64,7 +67,7 @@ def main():
         # Create fake packet data
         telem = build_telem_packet(args.loss_rate)
         # Add packet padding to the payload
-        telem = wrap_packet(telem)
+        telem = wrap_packet(telem, 0.25)
         # And finally, send the payload out to the destination (client)
         server_sock.sendto(
             telem.encode(),
