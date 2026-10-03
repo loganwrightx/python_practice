@@ -33,7 +33,7 @@ def main():
         required=True
     )
     parser.add_argument(
-        "--port",
+        "--dest-port",
         type=int,
         required=True
     )
