@@ -1,3 +1,4 @@
+
 """
 Author: Logan Wright
 Date: 10/03/2026
@@ -5,9 +6,10 @@ Description: Emulator script to send noisy telemetry packets over UDP to the tel
 """
 
 import argparse
-import socket
 import random
+import socket
 import time
+
 
 def build_telem_packet(loss_rate: float) -> str:
     lat = random.normalvariate(35.123456) if random.uniform(0.0, 1.0) > loss_rate else None

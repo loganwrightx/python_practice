@@ -17,17 +17,13 @@ Package imports and reasoning:
 - Rich thrid-party library to build a nice TUI dashboard
 """
 
-import socket
 import argparse
-import threading
 import queue
+import socket
+import threading
 
-from rich.live import (
-    Live
-)
-from rich.table import (
-    Table
-)
+from rich.live import Live
+from rich.table import Table
 
 ALLOWED_CHARS = set(
     (
@@ -103,9 +99,7 @@ def handle_payload(stream: bytes, telemetry_queue: queue.Queue) -> None:
     # Iterate over each char in stream
     for char in string_stream:
         # Detect full start of packet
-        if char == "$" and not in_payload:
-            pass
-        elif last_char == "$" and char == "T":
+        if char == "$" and not in_payload or last_char == "$" and char == "T":
             pass
         elif last_char == "T" and char == "X":
             # After confirming new packet, start empty string to store payload contents
@@ -114,9 +108,7 @@ def handle_payload(stream: bytes, telemetry_queue: queue.Queue) -> None:
         elif in_payload and char in ALLOWED_CHARS:
             payload += char
         elif in_payload:
-            if char == "R":
-                pass
-            elif last_char == "R" and char == "X":
+            if char == "R" or last_char == "R" and char == "X":
                 pass
             elif last_char == "X" and char == "$":
                 # Full packet has been received, so make the Telemetry object finally
@@ -142,7 +134,6 @@ def handle_payload(stream: bytes, telemetry_queue: queue.Queue) -> None:
         last_char = char
     
     # Finally, make telemetry objects from payloads array
-    pass
 
 def udp_client(client_socket: socket.socket, telemetry_queue: queue.Queue) -> None:
     while True:
@@ -151,7 +142,7 @@ def udp_client(client_socket: socket.socket, telemetry_queue: queue.Queue) -> No
             stream = client_socket.recv(1024)
             # Give stream and queue to the handler
             handle_payload(stream, telemetry_queue)
-        except Exception as e:
+        except Exception:
             # Handle error by ignoring for now
             pass
 
